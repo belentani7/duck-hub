@@ -1,33 +1,26 @@
-# DUCK HUB — centro de producción Duck Studio
+# duck-hub
 
-Hub full-stack del ecosistema Duck (consolidado desde `Duck-Omega`, verificado 2026-08-30).
+Centro del ecosistema Duck.
 
-**Stack:** Astro 5 + Vite + Express + tRPC + Drizzle (MySQL) · Node ≥ 20 · pnpm
+## Qué es
 
-## Contenido
+El punto de entrada al universo Duck: agrupa los proyectos, su estado y sus enlaces. Astro
+como base, con islas interactivas donde hacen falta.
 
-- Frontend Astro (4 rutas) con UI del catálogo de apps: OMEGA-79, ZION-33, NOVA-7, ODIN-2, REX-20, iDUCK, SIM-22, ALPHA-77, FL STUDIO, STUDIO
-- Backend Express + tRPC (`server/`), con módulo OAuth opcional
-- Base de datos Drizzle (`drizzle/`, requiere MySQL solo si se usa persistencia)
+## Stack
 
-## Arranque
+- **Astro** — sitio (`astro.config.mjs`)
+- **TypeScript** — tipado
+- **Drizzle** — datos (`drizzle.config.ts`)
+- **Tailwind + shadcn/ui** — interfaz
 
-```bat
+## Puesta en marcha
+
+```bash
 pnpm install
-pnpm build
-pnpm start
+pnpm dev
 ```
-→ http://localhost:3000 (producción: sirve el frontend compilado).
 
-Desarrollo: `pnpm dev`
+## Licencia
 
-## Reparaciones ya aplicadas
-
-- Scripts Windows-compatible (`cross-env`) — antes usaban sintaxis Unix que fallaba en Windows.
-- `pnpm.onlyBuiltDependencies` para `esbuild` y `@tailwindcss/oxide`.
-- Verificado: build OK y servidor respondiendo 200.
-
-## Notas
-
-- Login OAuth: requiere variable de entorno `OAUTH_SERVER_URL` (opcional; sin ella el sitio funciona igual).
-- Sin `.env` comprometido: solo existe `.env.example`.
+Sin licencia declarada.
