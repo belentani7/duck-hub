@@ -18,7 +18,7 @@ const links = [
     <nav class="desktop-nav" aria-label="Navegação principal">
       {links.map(([href, key]) => <a class:list={["nav-link", { active: active === href }]} class="focus-ring" href={sitePath(href)} data-i18n={key}>{key}</a>)}
     </nav>
-    <a class="status focus-ring" href={sitePath("/hub")}><span></span> <span data-i18n="apiOnline">API ONLINE</span> <b data-i18n="signIn">Entrar →</b></a>
+    <a class="status focus-ring" href={sitePath("/hub")}><span></span> <span data-i18n="apiOnline">API NÃO CONECTADA</span> <b data-i18n="signIn">Explorar →</b></a>
   </div>
 </header>
 <nav class="mobile-nav" aria-label="Navegação mobile">
@@ -36,10 +36,10 @@ const links = [
   .nav-link { color:#71857a; padding:9px 13px; border-radius:10px; text-decoration:none; font-size:12px; transition: color .2s, background .2s; }
   .nav-link:hover, .nav-link.active { color:#c8f8df; background:rgba(52,211,153,.08); }
   .status { color:#708078; font-size:11px; text-decoration:none; white-space:nowrap; }
-  .status span { display:inline-block; width:7px; height:7px; margin-right:7px; border-radius:50%; background:#34d399; box-shadow:0 0 12px #34d399; }
+  .status span { display:inline-block; width:7px; height:7px; margin-right:7px; border-radius:50%; background:#71857a; box-shadow:none; }
   .status b { color:#75e8bd; margin-left:9px; font-weight:500; }
   .mobile-nav { display:none; }
-  @media (max-width: 720px) {
+  @media (max-width: 900px) {
     .topbar-inner { min-height:68px; }
     .desktop-nav, .status { display:none; }
     .mobile-nav { position:fixed; z-index:15; left:12px; right:12px; bottom:12px; display:grid; grid-template-columns:repeat(4,1fr); padding:7px; border:1px solid rgba(167,243,208,.14); border-radius:18px; background:rgba(5,14,10,.88); backdrop-filter:blur(22px); box-shadow:0 14px 45px rgba(0,0,0,.45); }

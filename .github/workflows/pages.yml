@@ -1,7 +1,6 @@
 name: Publish Duck Hub — Astro
+# Publication requires a separate reviewed, explicit dispatch after rights and privacy checks.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
