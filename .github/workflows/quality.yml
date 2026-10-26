@@ -29,3 +29,11 @@ jobs:
         run: pnpm check
       - name: Tests
         run: pnpm test
+      - name: Validate Astro components
+        run: pnpm astro:check
+      - name: Build project Pages artifact without deploying
+        run: pnpm exec astro build
+        env:
+          GITHUB_ACTIONS: 'true'
+      - name: Verify built routes, navigation and local assets
+        run: node scripts/verify-pages.mjs
