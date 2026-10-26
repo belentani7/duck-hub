@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { catalogDetailsUrl, escapeHtml, safeBpm, safeCents } from "../src/lib/catalogSafe";
+import { catalogDetailsUrl, catalogLicenseState, parseCents, escapeHtml, safeBpm, safeCents } from "../src/lib/catalogSafe";
 
 describe("public catalog HTML and navigation safety", () => {
   it("escapes attacker-controlled text in HTML and attributes", () => {
@@ -19,4 +19,25 @@ describe("public catalog HTML and navigation safety", () => {
     expect(catalogDetailsUrl("/duck-hub/", 'a&b')).toBe("/duck-hub/catalog/?beat=a%26b");
     expect(catalogDetailsUrl("/", "sinal")).toBe("/catalog/?beat=sinal");
   });
+  it("does not present missing or invalid catalog prices as free offers", () => {
+    for (const value of [null, undefined, "", " ", "-42", "Infinity", "NaN", "0x10", "1.2", -1, 1.2, Infinity, NaN, 9007199254740992, {}, true]) {
+      expect(parseCents(value)).toBeNull();
+    }
+    expect(parseCents(0)).toBe(0);
+    expect(parseCents("0")).toBe(0);
+    expect(parseCents(1250)).toBe(1250);
+    expect(parseCents("1250")).toBe(1250);
+  });
+
+  it("disables purchase when all prices are missing or beat is reserved", () => {
+    expect(catalogLicenseState("available", null, undefined)).toEqual({
+      nonExclusiveCents: null, exclusiveCents: null, initialLicense: null, canBuy: false,
+    });
+    expect(catalogLicenseState("available", -1, 1250)).toEqual({
+      nonExclusiveCents: null, exclusiveCents: 1250, initialLicense: "exclusive", canBuy: true,
+    });
+    expect(catalogLicenseState("reserved", 0, 1200).canBuy).toBe(false);
+    expect(catalogLicenseState("available", 0, 1200).canBuy).toBe(true);
+  });
+
 });

@@ -6,7 +6,7 @@
 </section>
 <script>
   import { gsap } from "gsap";
-  import { catalogDetailsUrl, escapeHtml, safeBpm, safeCents } from "../lib/catalogSafe";
+  import { catalogDetailsUrl, catalogLicenseState, escapeHtml, safeBpm } from "../lib/catalogSafe";
   const grid = document.querySelector("#beat-grid");
   const status = document.querySelector("#catalog-status");
   const messages = () => (window as any).__DUCK_TRANSLATIONS__?.[(window as any).__DUCK_LOCALE__] ?? { syncing: "Sincronizando...", catalogReady: "O catálogo está pronto.", addFirstGem: "Adicione a primeira Gema pelo Hub para iniciar a operação.", noCatalog: "Canal temporariamente offline.", tryAgain: "O núcleo continua protegido. Tente novamente.", beats: "beats", availability: "Disponível", reserved: "Reservado", nonExclusive: "Não exclusiva", exclusive: "Exclusiva", continue: "Continuar →", instrumental: "Instrumental", texture: "Textura pronta para receber a sua próxima ideia." };
@@ -35,14 +35,15 @@
     }
     grid.innerHTML = beats.map((beat: any) => {
       const available = beat.availability === "available";
-      return `<article class="beat-card glass" data-beat-card><div class="beat-art"><span class="beat-orb">♫</span><span class="mono beat-index">${escapeHtml(String(beat.id ?? "").padStart(2, "0"))}</span></div><div class="beat-body"><div class="beat-meta"><span>${escapeHtml(beat.genre || t.instrumental)}</span><span>${safeBpm(beat.bpm)} BPM</span></div><h3>${escapeHtml(beat.title)}</h3><p>${escapeHtml(beat.description || t.texture)}</p><div class="license-row"><button class="license active" data-license="non_exclusive" data-price="${safeCents(beat.nonExclusivePriceCents)}">${t.nonExclusive} <b>${money(safeCents(beat.nonExclusivePriceCents))}</b></button><button class="license" data-license="exclusive" data-price="${safeCents(beat.exclusivePriceCents)}">${t.exclusive} <b>${money(safeCents(beat.exclusivePriceCents))}</b></button></div><div class="card-footer"><span class="availability">${beat.availability === "available" ? t.available : t.reserved}</span><button type="button" class="buy-button focus-ring" data-buy ${available ? "" : "disabled"}>${t.continue}</button></div></div></article>`;
+      const { nonExclusiveCents, exclusiveCents, initialLicense, canBuy } = catalogLicenseState(beat.availability, beat.nonExclusivePriceCents, beat.exclusivePriceCents);
+      return `<article class="beat-card glass" data-beat-card data-available="${available ? "true" : "false"}"><div class="beat-art"><span class="beat-orb">♫</span><span class="mono beat-index">${escapeHtml(String(beat.id ?? "").padStart(2, "0"))}</span></div><div class="beat-body"><div class="beat-meta"><span>${escapeHtml(beat.genre || t.instrumental)}</span><span>${safeBpm(beat.bpm)} BPM</span></div><h3>${escapeHtml(beat.title)}</h3><p>${escapeHtml(beat.description || t.texture)}</p><div class="license-row"><button class="license ${initialLicense === "non_exclusive" ? "active" : ""}" type="button" data-license="non_exclusive" data-price="${nonExclusiveCents ?? ""}" ${nonExclusiveCents === null ? "disabled" : ""}>${t.nonExclusive} <b>${nonExclusiveCents === null ? "—" : money(nonExclusiveCents)}</b></button><button class="license ${initialLicense === "exclusive" ? "active" : ""}" type="button" data-license="exclusive" data-price="${exclusiveCents ?? ""}" ${exclusiveCents === null ? "disabled" : ""}>${t.exclusive} <b>${exclusiveCents === null ? "—" : money(exclusiveCents)}</b></button></div><div class="card-footer"><span class="availability">${beat.availability === "available" ? t.available : t.reserved}</span><button type="button" class="buy-button focus-ring" data-buy ${canBuy ? "" : "disabled"}>${t.continue}</button></div></div></article>`;
     }).join("");
     grid.querySelectorAll<HTMLElement>("[data-beat-card]").forEach((card, index) => {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (!reduce) gsap.fromTo(card, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: .55, delay: index * .07, ease: "power3.out" });
       card.addEventListener("mouseenter", () => { if (!reduce) gsap.to(card, { y: -5, duration: .2, ease: "power2.out" }); });
       card.addEventListener("mouseleave", () => { if (!reduce) gsap.to(card, { y: 0, duration: .28, ease: "power2.out" }); });
-      card.querySelectorAll<HTMLButtonElement>("[data-license]").forEach(button => button.addEventListener("click", () => { card.querySelectorAll("[data-license]").forEach(item => item.classList.remove("active")); button.classList.add("active"); }));
+      card.querySelectorAll<HTMLButtonElement>("[data-license]").forEach(button => button.addEventListener("click", () => { if (button.disabled) return; card.querySelectorAll("[data-license]").forEach(item => item.classList.remove("active")); button.classList.add("active"); const buy = card.querySelector<HTMLButtonElement>("[data-buy]"); if (buy) buy.disabled = card.dataset.available !== "true"; }));
       card.querySelector<HTMLButtonElement>("[data-buy]")?.addEventListener("click", () => { const title = card.querySelector("h3")?.textContent || "beat"; window.location.href = catalogDetailsUrl(import.meta.env.BASE_URL, title); });
     });
   };
