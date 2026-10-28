@@ -47,15 +47,15 @@ footer{text-align:center;color:#48695e;font-size:10px;margin-top:30px;letter-spa
 // SITE ROUTES: URLs are intentionally web destinations, not Git repositories.
 // Replace/add deployed URLs here as each Duck site goes live.
 const SITES=[
- {name:'YouDuck',url:'https://belentani7.github.io/Duck-Omega/',desc:'Duck portal / home'},
- {name:'DuckBook',url:'https://belentani7.github.io/DuckBook/',desc:'biblioteca web'},
- {name:'DickDock',url:'https://belentani7.github.io/DickDock/',desc:'dock social / utilities'},
- {name:'Duck Beat',url:'https://belentani7.github.io/Duck-Omega/beat/',desc:'music web app'},
- {name:'Duck Studio',url:'https://belentani7.github.io/duck-zion-studio/',desc:'studio web'},
- {name:'Gema Lab',url:'https://belentani7.github.io/DUCK-A-GEMA-1-LAB/',desc:'creative lab'},
- {name:'Duck Zion',url:'https://belentani7.github.io/DUCK-ZION-GITHUB/',desc:'Zion portal'},
+ {name:'YouDuck',url:'https://github.com/belentani7/Duck-Omega',desc:'Duck portal / home'},
+ {name:'DuckBook',url:'https://github.com/belentani7/DuckBook',desc:'biblioteca web'},
+ {name:'DickDock',url:'https://github.com/belentani7/DickDock',desc:'dock social / utilities'},
+ {name:'Duck Beat',url:'https://github.com/belentani7/Duck-Omega',desc:'music web app'},
+ {name:'Duck Studio',url:'https://github.com/belentani7/duck-zion-studio',desc:'studio web'},
+ {name:'Gema Lab',url:'https://github.com/belentani7/DUCK-A-GEMA-1-LAB',desc:'creative lab'},
+ {name:'Duck Zion',url:'https://github.com/belentani7/DUCK-ZION-GITHUB',desc:'Zion portal'},
  {name:'Belentani Experience',url:'https://belentanip-qaacxo29.manus.space',desc:'site público existente'},
- {name:'GitHub Pages hub',url:'https://belentani7.github.io/Duck-Omega/',desc:'host do iDuck'}
+ {name:'GitHub Pages hub',url:'https://github.com/belentani7/Duck-Omega',desc:'host do iDuck'}
 ];
 const $=s=>document.querySelector(s);
 function renderSites(){ $('#sites').innerHTML=SITES.map(s=>`<a class="site" href="${s.url}" target="_blank" rel="noopener"><span><strong>${s.name}</strong><small>${s.desc}</small></span><em>↗</em></a>`).join(''); }
