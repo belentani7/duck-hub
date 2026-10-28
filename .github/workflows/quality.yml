@@ -29,6 +29,8 @@ jobs:
         run: pnpm check
       - name: Tests
         run: pnpm test
+      - name: Pages gate regression tests
+        run: node --test scripts/verify-pages.test.mjs
       - name: Validate Astro components
         run: pnpm astro:check
       - name: Build project Pages artifact without deploying

@@ -25,6 +25,10 @@ jobs:
         run: |
           pnpm check
           pnpm astro:check
+      - name: Run product and Pages regression tests
+        run: |
+          pnpm test
+          node --test scripts/verify-pages.test.mjs
       - name: Compile real Astro static site
         run: pnpm exec astro build
         env:
