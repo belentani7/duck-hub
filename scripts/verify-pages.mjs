@@ -7,10 +7,49 @@ const ROUTES = ['/', '/hub/', '/catalog/', '/ferramentas/'];
 const PAGES = ['index.html', 'hub/index.html', 'catalog/index.html', 'ferramentas/index.html'];
 const BASE = '/duck-hub/';
 
+function* startTags(html) {
+  let position = 0;
+  while ((position = html.indexOf('<', position)) !== -1) {
+    if (html.startsWith('<!--', position)) {
+      const end = html.indexOf('-->', position + 4);
+      position = end === -1 ? html.length : end + 3;
+      continue;
+    }
+    const opening = /^<([a-z][\w:-]*)\b/i.exec(html.slice(position));
+    if (!opening) { position++; continue; }
+    const name = opening[1].toLowerCase();
+    let end = position + opening[0].length;
+    let quote = null;
+    for (; end < html.length; end++) {
+      const char = html[end];
+      if (quote) { if (char === quote) quote = null; }
+      else if (char === '"' || char === "'") quote = char;
+      else if (char === '>') break;
+    }
+    if (end === html.length) break;
+    const attrs = new Map();
+    const raw = html.slice(position + opening[0].length, end);
+    const pattern = /([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+    for (const match of raw.matchAll(pattern)) {
+      attrs.set(match[1].toLowerCase(), match[2] ?? match[3] ?? match[4] ?? '');
+    }
+    yield { name, attrs, contentStart: end + 1 };
+    position = end + 1;
+    if (['script', 'style', 'template', 'textarea', 'title'].includes(name)) {
+      const close = new RegExp(`</${name}\\s*>`, 'gi');
+      close.lastIndex = position;
+      const match = close.exec(html);
+      position = match ? close.lastIndex : html.length;
+    }
+  }
+}
+
 function attributes(html, tag, attribute) {
-  const tags = html.match(new RegExp(`<${tag}\\b[^>]*>`, 'gi')) ?? [];
-  const attr = new RegExp(`\\b${attribute}\\s*=\\s*(["'])(.*?)\\1`, 'i');
-  return tags.map((element) => element.match(attr)?.[2]).filter((value) => value !== undefined);
+  const values = [];
+  for (const item of startTags(html)) {
+    if (item.name === tag && item.attrs.has(attribute)) values.push(item.attrs.get(attribute));
+  }
+  return values;
 }
 
 function localPath(url, base, output, label) {
@@ -40,8 +79,11 @@ export function verifyPages(output = resolve('dist/public'), base = BASE) {
 
   for (const page of PAGES) {
     const html = readFileSync(resolve(output, page), 'utf8');
-    assert.match(html, /<main\b/i, `${page}: missing main landmark`);
-    assert.match(html, /<title>[^<\s][^<]*<\/title>/i, `${page}: missing non-empty SEO title`);
+    const tags = [...startTags(html)];
+    assert.ok(tags.some((tag) => tag.name === 'main'), `${page}: missing main landmark`);
+    assert.ok(tags.some((tag) => tag.name === 'title' &&
+      /^([^<]*\S[^<]*)<\/title\s*>/i.test(html.slice(tag.contentStart))),
+      `${page}: missing non-empty SEO title`);
     const anchors = attributes(html, 'a', 'href');
     const resources = [
       ...attributes(html, 'img', 'src'),

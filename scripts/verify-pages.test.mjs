@@ -68,3 +68,42 @@ test('rejects pages without semantic main and a real title', () => {
   withFixture((files) => files.set('hub/index.html', files.get('hub/index.html').replace('<title>Duck 1</title>', '<title> </title>')),
     (root) => assert.throws(() => verifyPages(root), /missing non-empty SEO title/));
 });
+
+test('rejects fake navigation in comments, script strings, template and data attributes', () => {
+  const real = '<a href="/duck-hub/catalog/">/catalog/</a>';
+  const fake = [
+    '<!-- <a href="/duck-hub/catalog/">fake</a> -->',
+    '<script>const fake = `<a href="/duck-hub/catalog/">fake</a>`</script>',
+    '<template><a href="/duck-hub/catalog/">fake</a></template>',
+    '<div data-markup="<a href=\'/duck-hub/catalog/\'>">fake</div>',
+    '<a data-href="/duck-hub/catalog/">fake</a>',
+  ];
+  for (const replacement of fake) {
+    withFixture((files) => files.set('index.html', files.get('index.html').replace(real, replacement)),
+      (root) => assert.throws(() => verifyPages(root), /missing actual scoped anchor/, replacement));
+  }
+});
+
+test('rejects missing assets disguised as commented or scripted markup', () => {
+  for (const fake of [
+    '<!-- <img src="/duck-hub/missing.svg"> -->',
+    '<script>const sample = `<img src="/duck-hub/missing.svg">`</script>',
+  ]) {
+    withFixture((files) => files.set('hub/index.html', files.get('hub/index.html') + fake),
+      (root) => assert.deepEqual(verifyPages(root), { routes: 4, base: BASE }));
+  }
+});
+
+test('recognizes valid mixed-case and unquoted href attributes', () => {
+  withFixture((files) => files.set('index.html', files.get('index.html').replace('<a href="/duck-hub/catalog/">', '<A HREF=/duck-hub/catalog/>')),
+    (root) => assert.deepEqual(verifyPages(root), { routes: 4, base: BASE }));
+});
+
+test('rejects commented-out or scripted main and title placeholders', () => {
+  withFixture((files) => files.set('hub/index.html', files.get('hub/index.html')
+    .replace('<main>', '<div><!-- <main> -->').replace('</main>', '</div>')),
+    (root) => assert.throws(() => verifyPages(root), /missing main landmark/));
+  withFixture((files) => files.set('hub/index.html', files.get('hub/index.html')
+    .replace('<title>Duck 1</title>', '<!-- <title>Duck 1</title> -->')),
+    (root) => assert.throws(() => verifyPages(root), /missing non-empty SEO title/));
+});
